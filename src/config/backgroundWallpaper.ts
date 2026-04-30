@@ -37,14 +37,14 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	 */
 	src: {
 		// 桌面背景图片（支持单张或多张随机）
-		// desktop: "assets/images/DesktopWallpaper/d1.avif",
 		desktop: [
 			"assets/images/DesktopWallpaper/d1.avif",
-			"assets/images/DesktopWallpaper/d2.avif",
-			"assets/images/DesktopWallpaper/d3.avif",
-			"assets/images/DesktopWallpaper/d4.avif",
-			"assets/images/DesktopWallpaper/d5.avif",
-			"assets/images/DesktopWallpaper/d6.avif",
+			"assets/images/DesktopWallpaper/mine2.jpg",
+			"assets/images/DesktopWallpaper/mine3.jpg",
+			"assets/images/DesktopWallpaper/mine4.jpg",
+			"assets/images/DesktopWallpaper/mine5.jpg",
+			"assets/images/DesktopWallpaper/mine6.jpg",
+			"assets/images/DesktopWallpaper/mine7.jpg",
 		],
 		// 移动背景图片（支持单张或多张随机）
 		// mobile: "assets/images/MobileWallpaper/m1.avif",
