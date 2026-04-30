@@ -37,15 +37,16 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	 */
 	src: {
 		// 桌面背景图片（支持单张或多张随机）
-		desktop: [
+		/*desktop: [
 			"assets/images/DesktopWallpaper/d1.avif",
 			"assets/images/DesktopWallpaper/mine2.jpg",
-			"assets/images/DesktopWallpaper/mine3.jpg",
+			"assets/images/DesktopWallpaper/mine3.jpg", cool
 			"assets/images/DesktopWallpaper/mine4.jpg",
 			"assets/images/DesktopWallpaper/mine5.jpg",
 			"assets/images/DesktopWallpaper/mine6.jpg",
 			"assets/images/DesktopWallpaper/mine7.jpg",
-		],
+		],*/
+		desktop : "assets/images/DesktopWallpaper/mine3.jpg",
 		// 移动背景图片（支持单张或多张随机）
 		// mobile: "assets/images/MobileWallpaper/m1.avif",
 		mobile: [
@@ -62,7 +63,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 		// 图片位置
 		// 支持所有CSS object-position值，如: 'top', 'center', 'bottom', 'left top', 'right bottom', '25% 75%', '10px 20px'..
 		// 如果不知道怎么配置百分百之类的配置，推荐直接使用：'center'居中，'top'顶部居中，'bottom' 底部居中，'left'左侧居中，'right'右侧居中
-		position: "0% 20%",
+		position: "0% 50%",
 
 		// 主页横幅文字
 		homeText: {
