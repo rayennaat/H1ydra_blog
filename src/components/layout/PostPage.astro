@@ -60,7 +60,11 @@ const initialLayoutClass =
 <!-- 立即执行脚本：防止刷新时的布局闪烁 -->
 <script is:inline define:vars={{ defaultLayout, mobileDefaultLayout, columnWidth }}>
   (function() {
-    const savedLayout = localStorage.getItem('postListLayout');
+    const storedLayout = localStorage.getItem('postListLayout');
+    const savedLayout = storedLayout === 'list' || storedLayout === 'grid' ? storedLayout : null;
+    if (storedLayout && !savedLayout) {
+      localStorage.removeItem('postListLayout');
+    }
     // 根据视口宽度确定有效的默认布局
     const effectiveDefault = window.innerWidth < 780 ? mobileDefaultLayout : defaultLayout;
     // 低于380px强制网格模式
@@ -97,7 +101,11 @@ const initialLayoutClass =
     if (!postListContainer) return;
 
     // 从localStorage读取用户偏好
-    const savedLayout = localStorage.getItem("postListLayout");
+    const storedLayout = localStorage.getItem("postListLayout");
+    const savedLayout = storedLayout === "list" || storedLayout === "grid" ? storedLayout : null;
+    if (storedLayout && !savedLayout) {
+      localStorage.removeItem("postListLayout");
+    }
     const defaultLayout =
       postListContainer.getAttribute("data-default-layout") || "list";
     const mobileDefaultLayout =

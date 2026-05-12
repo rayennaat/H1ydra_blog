@@ -334,6 +334,17 @@ function switchLayout() {
 	}, 500);
 }
 
+function getSavedPostListLayout(): "list" | "grid" | null {
+	const savedLayout = localStorage.getItem("postListLayout");
+	if (savedLayout === "list" || savedLayout === "grid") {
+		return savedLayout;
+	}
+	if (savedLayout !== null) {
+		localStorage.removeItem("postListLayout");
+	}
+	return null;
+}
+
 onMount(() => {
 	mounted = true;
 	checkScreenSize();
@@ -356,8 +367,8 @@ onMount(() => {
 	overlayCardOpacity = getStoredOverlayCardOpacity();
 
 	// 从localStorage读取用户偏好布局
-	const savedLayout = localStorage.getItem("postListLayout");
-	if (savedLayout && (savedLayout === "list" || savedLayout === "grid")) {
+	const savedLayout = getSavedPostListLayout();
+	if (savedLayout) {
 		currentLayout = savedLayout;
 	} else {
 		currentLayout =

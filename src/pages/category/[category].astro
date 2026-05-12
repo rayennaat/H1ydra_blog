@@ -1,0 +1,73 @@
+---
+import PostCard from "@/components/layout/PostCard.astro";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@/utils/content-utils";
+import { getCategorySlug, getPostUrlBySlug } from "@/utils/url-utils";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+
+export async function getStaticPaths() {
+	const posts = await getSortedPosts();
+	const categoryMap = new Map<string, string>();
+
+	for (const post of posts) {
+		const category = post.data.category?.trim();
+		if (!category) continue;
+		categoryMap.set(getCategorySlug(category), category);
+	}
+
+	return [...categoryMap].map(([categorySlug, categoryName]) => ({
+		params: { category: categorySlug },
+		props: { categoryName },
+	}));
+}
+
+const { categoryName } = Astro.props;
+const posts = (await getSortedPosts()).filter(
+	(post) => post.data.category === categoryName,
+);
+let delay = 0;
+const interval = 50;
+---
+
+<MainGridLayout title={categoryName}>
+	<div class="card-base px-8 py-6 mb-4 onload-animation">
+		<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+			<div class="min-w-0 text-sm text-75">
+				<span class="text-50">{i18n(I18nKey.categories)}</span>
+				<span class="mx-2 text-30">/</span>
+				<span class="font-semibold text-(--primary)">{categoryName}</span>
+			</div>
+			<div class="shrink-0 text-xs text-50">
+				{posts.length} {i18n(posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount)}
+			</div>
+		</div>
+	</div>
+
+	<div
+		id="post-list-container"
+		class="transition-all duration-500 ease-in-out mb-4 flex flex-col gap-4 md:gap-4 list-mode"
+	>
+		{
+			posts.map((entry, index) => (
+				<PostCard
+					entry={entry}
+					title={entry.data.title}
+					tags={entry.data.tags}
+					category={entry.data.category}
+					published={entry.data.published}
+					updated={entry.data.updated}
+					url={getPostUrlBySlug(entry.id)}
+					image={entry.data.image}
+					description={entry.data.description}
+					draft={entry.data.draft}
+					pinned={entry.data.pinned}
+					password={!!entry.data.password}
+					loading={index < 2 ? "eager" : "lazy"}
+					class:list="onload-animation post-card-item"
+					style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+				/>
+			))
+		}
+	</div>
+</MainGridLayout>

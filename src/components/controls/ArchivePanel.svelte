@@ -9,10 +9,7 @@ export let tags: string[] = [];
 export let categories: string[] = [];
 export let sortedPosts: Post[] = [];
 
-const params = new URLSearchParams(window.location.search);
-tags = params.has("tag") ? params.getAll("tag") : [];
-categories = params.has("category") ? params.getAll("category") : [];
-const uncategorized = params.get("uncategorized");
+let uncategorized = false;
 
 interface Post {
 	id: string;
@@ -20,7 +17,7 @@ interface Post {
 		title: string;
 		tags: string[];
 		category?: string | null;
-		published: Date;
+		published: Date | string;
 	};
 }
 
@@ -35,14 +32,20 @@ interface ActiveFilter {
 }
 
 let groups: Group[] = [];
+let visiblePosts: Post[] = [];
 let activeFilters: ActiveFilter[] = [];
 let primaryFilter: ActiveFilter | null = null;
 let secondaryFilters: ActiveFilter[] = [];
 let filteredPostCount = 0;
 
-function formatDate(date: Date) {
-	const month = (date.getMonth() + 1).toString().padStart(2, "0");
-	const day = date.getDate().toString().padStart(2, "0");
+function toDate(date: Date | string) {
+	return date instanceof Date ? date : new Date(date);
+}
+
+function formatDate(date: Date | string) {
+	const parsedDate = toDate(date);
+	const month = (parsedDate.getMonth() + 1).toString().padStart(2, "0");
+	const day = parsedDate.getDate().toString().padStart(2, "0");
 	return `${month}-${day}`;
 }
 
@@ -69,7 +72,7 @@ function formatFilterSummary(filters: ActiveFilter[]) {
 		.join("  ·  ");
 }
 
-onMount(async () => {
+function updateArchiveState() {
 	let filteredPosts: Post[] = sortedPosts;
 	const currentFilters: ActiveFilter[] = [];
 
@@ -115,13 +118,17 @@ onMount(async () => {
 	// 按发布时间倒序排序，确保不受置顶影响
 	filteredPosts = filteredPosts
 		.slice()
-		.sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
+		.sort(
+			(a, b) =>
+				toDate(b.data.published).getTime() - toDate(a.data.published).getTime(),
+		);
 
+	visiblePosts = filteredPosts;
 	filteredPostCount = filteredPosts.length;
 
 	const grouped = filteredPosts.reduce(
 		(acc, post) => {
-			const year = post.data.published.getFullYear();
+			const year = toDate(post.data.published).getFullYear();
 			if (!acc[year]) {
 				acc[year] = [];
 			}
@@ -139,6 +146,17 @@ onMount(async () => {
 	groupedPostsArray.sort((a, b) => b.year - a.year);
 
 	groups = groupedPostsArray;
+}
+
+$: {
+	updateArchiveState();
+}
+
+onMount(() => {
+	const params = new URLSearchParams(window.location.search);
+	tags = params.has("tag") ? params.getAll("tag") : [];
+	categories = params.has("category") ? params.getAll("category") : [];
+	uncategorized = params.has("uncategorized");
 });
 </script>
 
@@ -163,6 +181,37 @@ onMount(async () => {
 		</div>
 	{/if}
 
+	{#if primaryFilter?.labelKey === I18nKey.categories}
+		<div class="space-y-2">
+			{#each visiblePosts as post}
+				<a
+						href={getPostUrlBySlug(post.id)}
+						aria-label={post.data.title}
+						class="group btn-plain block! w-full rounded-xl hover:text-[initial]"
+				>
+					<div class="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+						<div class="min-w-0">
+							<div
+									class="font-bold text-75 transition-all group-hover:text-(--primary)
+                         whitespace-nowrap text-ellipsis overflow-hidden"
+							>
+								{post.data.title}
+							</div>
+							<div class="mt-1 text-xs text-50">
+								{formatDate(post.data.published)}
+							</div>
+						</div>
+						<div
+								class="text-sm transition whitespace-nowrap text-ellipsis overflow-hidden text-30
+                       sm:max-w-[35%]"
+						>
+							{formatTag(post.data.tags)}
+						</div>
+					</div>
+				</a>
+			{/each}
+		</div>
+	{:else}
 	{#each groups as group}
 		<div>
 			<div class="flex flex-row w-full items-center h-15">
@@ -225,4 +274,5 @@ onMount(async () => {
 			{/each}
 		</div>
 	{/each}
+	{/if}
 </div>

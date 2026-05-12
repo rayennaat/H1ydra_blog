@@ -14,7 +14,7 @@ export type SiteConfig = {
 	description?: string; // 网站描述，用于生成 <meta name="description">
 	keywords?: string[]; // 站点关键词，用于生成 <meta name="keywords">
 
-	lang: "en" | "zh_CN" | "zh_TW" | "ja" | "ru";
+	lang: "en";
 
 	themeColor: {
 		hue: number;
@@ -53,6 +53,20 @@ export type SiteConfig = {
 		categoryOrder?: ("anime" | "game" | "book" | "music" | "real")[]; // 条目类型排序顺序
 	};
 
+	tmdb?: {
+		movieIds: number[];
+		watchingMovieIds?: number[];
+		watchingTvIds?: number[];
+		watchlistMovieIds?: number[];
+		watchlistTvIds?: number[];
+		language?: string;
+	};
+
+	anime?: {
+		username: string;
+		statuses?: ("watching" | "completed" | "plan_to_watch")[];
+	};
+
 	generateOgImages: boolean;
 	favicon: Array<{
 		src: string;
@@ -84,6 +98,8 @@ export type SiteConfig = {
 		sponsor: boolean; // 赞助页面开关
 		guestbook: boolean; // 留言板页面开关
 		bangumi: boolean;
+		tmdb: boolean;
+		anime: boolean;
 		gallery: boolean; // 相册页面开关
 	};
 

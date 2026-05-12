@@ -40,6 +40,18 @@ export function getDefaultTheme(): LIGHT_DARK_MODE {
 	return siteConfig.themeColor.defaultMode ?? DEFAULT_THEME;
 }
 
+function isValidTheme(theme: string | null): theme is LIGHT_DARK_MODE {
+	return theme === LIGHT_MODE || theme === DARK_MODE || theme === SYSTEM_MODE;
+}
+
+function isValidWallpaperMode(mode: string | null): mode is WALLPAPER_MODE {
+	return (
+		mode === WALLPAPER_BANNER ||
+		mode === WALLPAPER_OVERLAY ||
+		mode === WALLPAPER_NONE
+	);
+}
+
 // 获取系统主题
 export function getSystemTheme(): LIGHT_DARK_MODE {
 	if (typeof window === "undefined") {
@@ -172,6 +184,8 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 		// 如果切换其他模式，移除系统主题监听
 		cleanupSystemThemeListener();
 	}
+
+	window.dispatchEvent(new CustomEvent("theme-change"));
 }
 
 // 设置系统主题监听器
@@ -252,9 +266,15 @@ export function getStoredTheme(): LIGHT_DARK_MODE {
 	) {
 		return getDefaultTheme();
 	}
-	return (
-		(localStorage.getItem("theme") as LIGHT_DARK_MODE) || getDefaultTheme()
-	);
+	const storedTheme = localStorage.getItem("theme");
+	if (!storedTheme) {
+		return getDefaultTheme();
+	}
+	if (isValidTheme(storedTheme)) {
+		return storedTheme;
+	}
+	localStorage.removeItem("theme");
+	return getDefaultTheme();
 }
 
 // 初始化主题监听器（用于页面加载后）
@@ -683,10 +703,15 @@ export function getStoredWallpaperMode(): WALLPAPER_MODE {
 		return backgroundWallpaper.mode;
 	}
 
-	return (
-		(localStorage.getItem("wallpaperMode") as WALLPAPER_MODE) ||
-		backgroundWallpaper.mode
-	);
+	const storedMode = localStorage.getItem("wallpaperMode");
+	if (!storedMode) {
+		return backgroundWallpaper.mode;
+	}
+	if (isValidWallpaperMode(storedMode)) {
+		return storedMode;
+	}
+	localStorage.removeItem("wallpaperMode");
+	return backgroundWallpaper.mode;
 }
 
 // Overlay settings functions

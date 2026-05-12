@@ -31,6 +31,14 @@ export function getTagUrl(tag: string): string {
 	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
 }
 
+export function getCategorySlug(category: string): string {
+	return category
+		.trim()
+		.toLowerCase()
+		.replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+		.replace(/^-+|-+$/g, "");
+}
+
 export function getCategoryUrl(category: string | null): string {
 	if (
 		!category ||
@@ -38,7 +46,7 @@ export function getCategoryUrl(category: string | null): string {
 		category.trim().toLowerCase() === i18n(I18nKey.uncategorized).toLowerCase()
 	)
 		return url("/archive/?uncategorized=true");
-	return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
+	return url(`/category/${getCategorySlug(category)}/`);
 }
 
 export function getDir(path: string): string {

@@ -27,7 +27,7 @@
 
 ---
 📖 README:
-**[简体中文](README.md)** | **[繁體中文](docs/README.zh-TW.md)** | **[English](README.en.md)** | **[日本語](docs/README.ja.md)** | **[Русский](docs/README.ru.md)** 
+**[English](README.md)**
 
 🚀 Quick Guide:
 [**🖥️Live Demo**](https://firefly.cuteleaf.cn/) /
@@ -61,7 +61,7 @@
 >
 >**For more layout configurations and demos, please see: [Firefly Layout System Details](https://firefly.cuteleaf.cn/posts/firefly-layout-system/)**
 >
->Firefly supports i18n multilingual UI, but except for Simplified Chinese, other languages are AI-translated. If you find any errors, feel free to submit a [Pull Request](https://github.com/CuteLeaf/Firefly/pulls) to help improve them.
+>Firefly is configured as an English-only site in this fork.
 
 ## ✨ Features
 
@@ -70,7 +70,7 @@
 - [x] **Astro + Tailwind CSS** - Ultra-fast static site generation based on modern tech stack
 - [x] **Smooth Animations** - Swup page transition animations for silky smooth browsing experience
 - [x] **Responsive Design** - Perfect adaptation for desktop, tablet and mobile devices
-- [x] **Multi-language Support** - i18n internationalization ui, supports Simplified Chinese, Traditional Chinese, English, Japanese, Russian
+- [x] **English UI** - English-only interface text
 - [x] **Full-text Search** - Client-side search based on Pagefind, supports article content indexing.
 
 ### Personalization
@@ -152,15 +152,11 @@ To set the default language for your blog, edit the `src/config/siteConfig.ts` f
 
 ```typescript
 // Define site language
-const SITE_LANG = "zh_CN";
+const SITE_LANG = "en";
 ```
 
 **Supported language codes:**
-- `zh_CN` - Simplified Chinese
-- `zh_TW` - Traditional Chinese
 - `en` - English
-- `ja` - Japanese
-- `ru` - Russian
 
 ### Configuration File Structure
 
@@ -202,7 +198,7 @@ image: ./cover.jpg  # Or use "api" to enable random cover images
 tags: [Foo, Bar]
 category: Front-end
 draft: false
-lang: zh-CN      # Only set when article language differs from site language in `siteConfig.ts`
+lang: en         # Optional; only set when needed by your content workflow
 pinned: false    # Pin article
 comment: true    # Enable comments
 ---

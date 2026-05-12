@@ -14,6 +14,7 @@ let result: SearchResult[] = [];
 let isSearching = false;
 let initialized = false;
 let debounceTimer: NodeJS.Timeout;
+let desktopInput: HTMLInputElement;
 
 // --- Mocks for Dev Mode ---
 const fakeResult: SearchResult[] = [
@@ -35,6 +36,10 @@ const togglePanel = () => {
 	document
 		.getElementById("search-panel")
 		?.classList.toggle("float-panel-closed");
+};
+
+const focusDesktopSearch = () => {
+	desktopInput?.focus();
 };
 
 const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
@@ -137,16 +142,24 @@ $: if (initialized && (keywordMobile || keywordMobile === "")) {
 </script>
 
 <!-- search bar for desktop view -->
-<div id="search-bar" class="hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg
+<div
+    role="search"
+    aria-label={i18n(I18nKey.search)}
+    on:click={focusDesktopSearch}
+    id="search-bar"
+    class="group hidden lg:flex transition-all items-center h-11 mr-2 rounded-lg
       bg-black/4 hover:bg-black/6 focus-within:bg-black/6
       dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
+      w-11 hover:w-60 focus-within:w-60 overflow-hidden cursor-text
 ">
     <Icon icon="material-symbols:search"
-          class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
+          class="shrink-0 text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/50 dark:text-white/60"></Icon>
     <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop}
+           bind:this={desktopInput}
            on:focus={() => search(keywordDesktop, true)}
-           class="transition-all pl-10 text-sm bg-transparent outline-0
-         h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
+           class="transition-all text-sm bg-transparent outline-0
+         h-full w-48 pl-3 text-black/50 dark:text-white/50 opacity-0 pointer-events-none
+         group-hover:opacity-100 group-focus-within:opacity-100 group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
     >
 </div>
 
@@ -240,4 +253,3 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
         overflow-y: auto;
     }
 </style>
-

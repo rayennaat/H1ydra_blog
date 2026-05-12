@@ -24,6 +24,7 @@ interface Props {
 	formats?: ImageFormat[];
 	loading?: "lazy" | "eager";
 	apiUrls?: string[];
+	fit?: "cover" | "contain";
 }
 
 const {
@@ -37,6 +38,7 @@ const {
 	formats = getImageFormats(),
 	loading = "lazy",
 	apiUrls = [],
+	fit = "cover",
 } = Astro.props;
 
 const configQuality = getImageQuality();
@@ -95,7 +97,8 @@ if (fallbackPath && !isLocal && !isFallbackPublic) {
 }
 
 // 图片样式
-const imageClass = "w-full h-full object-cover";
+const imageClass =
+	fit === "contain" ? "w-full h-auto object-contain" : "w-full h-full object-cover";
 const imageStyle = `object-position: ${position};`;
 
 // 响应式配置
@@ -124,6 +127,7 @@ const remoteReferrerPolicy =
 <div
 	id={id}
 	class:list={[className, "cover-image-container overflow-hidden relative"]}
+	data-fit={fit}
 	data-loading={showLoading ? "true" : "false"}
 	data-api-urls={apiUrls.length > 0 ? JSON.stringify(apiUrls) : undefined}
 >
@@ -271,6 +275,11 @@ const remoteReferrerPolicy =
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.cover-image-container[data-fit="contain"] img {
+		height: auto;
+		object-fit: contain;
 	}
 </style>
 

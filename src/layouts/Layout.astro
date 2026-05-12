@@ -259,8 +259,23 @@ const siteLang = lang.replace("_", "-");
       const DARK_MODE = "dark";
       const SYSTEM_MODE = "system";
 
+      function getValidStoredTheme() {
+        const storedTheme = localStorage.getItem("theme");
+        if (
+          storedTheme === LIGHT_MODE ||
+          storedTheme === DARK_MODE ||
+          storedTheme === SYSTEM_MODE
+        ) {
+          return storedTheme;
+        }
+        if (storedTheme) {
+          localStorage.removeItem("theme");
+        }
+        return defaultMode;
+      }
+
       // 获取存储的主题，如果没有则使用默认值
-      const theme = localStorage.getItem("theme") || defaultMode;
+      const theme = getValidStoredTheme();
 
       // 获取系统主题
       function getSystemTheme() {
@@ -345,8 +360,23 @@ const siteLang = lang.replace("_", "-");
       const WALLPAPER_BANNER = "banner";
       const WALLPAPER_OVERLAY = "overlay";
       const WALLPAPER_NONE = "none";
+      function getValidStoredWallpaperMode() {
+        const storedMode = localStorage.getItem("wallpaperMode");
+        if (
+          storedMode === WALLPAPER_BANNER ||
+          storedMode === WALLPAPER_OVERLAY ||
+          storedMode === WALLPAPER_NONE
+        ) {
+          return storedMode;
+        }
+        if (storedMode) {
+          localStorage.removeItem("wallpaperMode");
+        }
+        return defaultWallpaperMode;
+      }
+
       const wallpaperMode = isWallpaperSwitchable
-        ? localStorage.getItem("wallpaperMode") || defaultWallpaperMode
+        ? getValidStoredWallpaperMode()
         : defaultWallpaperMode;
 
       // 设置data-wallpaper-mode属性

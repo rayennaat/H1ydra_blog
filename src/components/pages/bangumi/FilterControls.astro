@@ -9,19 +9,40 @@ interface Props {
 	filters: Filter[];
 	activeFilter: string;
 	sectionId: string;
+	variant?: "pill" | "gallery";
 }
 
-const { filters, activeFilter, sectionId } = Astro.props;
+const { filters, activeFilter, sectionId, variant = "pill" } = Astro.props;
+
+const styleConfig = {
+	pill: {
+		container: "flex flex-wrap gap-1.5 mb-4",
+		base: "px-3 py-1 rounded-full text-xs font-medium transition-all duration-200",
+		active: "bg-(--primary) text-white shadow-md",
+		inactive:
+			"bg-(--btn-regular-bg) text-(--btn-content) hover:bg-(--btn-regular-bg-hover)",
+	},
+	gallery: {
+		container: "flex flex-wrap gap-2 mb-6",
+		base: "btn-regular px-3 py-1.5 rounded-lg transition-colors duration-200 text-sm font-medium",
+		active: "bg-(--primary) text-white hover:bg-(--primary)",
+		inactive:
+			"bg-(--btn-regular-bg) text-(--btn-content) hover:bg-(--btn-regular-bg-hover)",
+	},
+}[variant];
+
+const activeClasses = styleConfig.active.split(" ");
+const inactiveClasses = styleConfig.inactive.split(" ");
 ---
 
-<div class="flex flex-wrap gap-1.5 mb-4">
+<div class={styleConfig.container}>
   {filters.map((filter) => (
     <button
       class:list={[
-        "px-3 py-1 rounded-full text-xs font-medium transition-all duration-200",
+        styleConfig.base,
         {
-          "bg-(--primary) text-white shadow-md": filter.value === activeFilter,
-          "bg-(--btn-regular-bg) text-(--btn-content) hover:bg-(--btn-regular-bg-hover)": filter.value !== activeFilter
+          [styleConfig.active]: filter.value === activeFilter,
+          [styleConfig.inactive]: filter.value !== activeFilter
         }
       ]}
       data-filter={filter.value}
@@ -36,7 +57,7 @@ const { filters, activeFilter, sectionId } = Astro.props;
   ))}
 </div>
 
-<script is:inline define:vars={{ sectionId }}>
+<script is:inline define:vars={{ sectionId, activeClasses, inactiveClasses }}>
   function initFilterControls() {
     const filterButtons = document.querySelectorAll(`[data-section="${sectionId}"][data-filter]`);
 
@@ -48,12 +69,12 @@ const { filters, activeFilter, sectionId } = Astro.props;
         // Update active filter button for this section
         const sectionButtons = document.querySelectorAll(`[data-section="${currentSectionId}"][data-filter]`);
         sectionButtons.forEach(btn => {
-          btn.classList.remove('bg-(--primary)', 'text-white', 'shadow-md');
-          btn.classList.add('bg-(--btn-regular-bg)', 'text-(--btn-content)', 'hover:bg-(--btn-regular-bg-hover)');
+          btn.classList.remove(...activeClasses);
+          btn.classList.add(...inactiveClasses);
         });
 
-        this.classList.remove('bg-(--btn-regular-bg)', 'text-(--btn-content)', 'hover:bg-(--btn-regular-bg-hover)');
-        this.classList.add('bg-(--primary)', 'text-white', 'shadow-md');
+        this.classList.remove(...inactiveClasses);
+        this.classList.add(...activeClasses);
 
         // Filter items
         const items = document.querySelectorAll(`[data-item-section="${currentSectionId}"]`);

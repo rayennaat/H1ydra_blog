@@ -1,0 +1,356 @@
+---
+import { Icon } from "astro-icon/components";
+import ClientPagination from "@/components/common/ClientPagination.astro";
+import FilterControls from "@/components/pages/bangumi/FilterControls.astro";
+import { siteConfig } from "@/config";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { formatDateI18nWithTime } from "@/utils/date-utils";
+
+if (!siteConfig.pages.tmdb) {
+	return Astro.redirect("/404/");
+}
+
+type MediaType = "movie" | "tv";
+type MovieStatus = "watched" | "watching" | "watchlist";
+
+type TmdbItem = {
+	id: number;
+	title?: string;
+	name?: string;
+	overview: string;
+	poster_path: string | null;
+	backdrop_path: string | null;
+	release_date?: string;
+	first_air_date?: string;
+	runtime?: number | null;
+	episode_run_time?: number[];
+	vote_average: number;
+	genres: Array<{ id: number; name: string }>;
+	media_type: MediaType;
+};
+
+type TmdbEntry = {
+	id: number;
+	status: MovieStatus;
+	mediaType: MediaType;
+};
+
+const movieIds = siteConfig.tmdb?.movieIds ?? [];
+const watchingMovieIds = siteConfig.tmdb?.watchingMovieIds ?? [];
+const watchingTvIds = siteConfig.tmdb?.watchingTvIds ?? [];
+const watchlistMovieIds = siteConfig.tmdb?.watchlistMovieIds ?? [];
+const watchlistTvIds = siteConfig.tmdb?.watchlistTvIds ?? [];
+const language = siteConfig.tmdb?.language ?? "en-US";
+const accessToken = import.meta.env.TMDB_ACCESS_TOKEN;
+const buildTime = formatDateI18nWithTime(new Date());
+const sectionId = "tmdb";
+const itemsPerPage = 12;
+
+const tmdbEntries: TmdbEntry[] = [
+	...movieIds.map(
+		(id) => ({ id, status: "watched", mediaType: "movie" }) as const,
+	),
+	...watchingMovieIds.map(
+		(id) => ({ id, status: "watching", mediaType: "movie" }) as const,
+	),
+	...watchingTvIds.map(
+		(id) => ({ id, status: "watching", mediaType: "tv" }) as const,
+	),
+	...watchlistMovieIds.map(
+		(id) => ({ id, status: "watchlist", mediaType: "movie" }) as const,
+	),
+	...watchlistTvIds.map(
+		(id) => ({ id, status: "watchlist", mediaType: "tv" }) as const,
+	),
+];
+const entryKey = (mediaType: MediaType, id: number) => `${mediaType}:${id}`;
+const entryStatusMap = new Map(
+	tmdbEntries.map((entry) => [
+		entryKey(entry.mediaType, entry.id),
+		entry.status,
+	]),
+);
+const uniqueTmdbEntries = [
+	...new Map(
+		tmdbEntries.map((entry) => [entryKey(entry.mediaType, entry.id), entry]),
+	).values(),
+];
+
+const imageBaseUrl = "https://image.tmdb.org/t/p";
+const tmdbUrl = (mediaType: MediaType, id: number) =>
+	`https://www.themoviedb.org/${mediaType}/${id}`;
+const posterUrl = (path: string | null) =>
+	path ? `${imageBaseUrl}/w500${path}` : "";
+const backdropUrl = (path: string | null) =>
+	path ? `${imageBaseUrl}/w780${path}` : "";
+
+function formatRuntime(runtime: number | null) {
+	if (!runtime) return "";
+	const hours = Math.floor(runtime / 60);
+	const minutes = runtime % 60;
+	if (!hours) return `${minutes}m`;
+	return `${hours}h ${minutes}m`;
+}
+
+function getItemTitle(item: TmdbItem) {
+	return item.title || item.name || "Untitled";
+}
+
+function getItemYear(item: TmdbItem) {
+	const date = item.release_date || item.first_air_date;
+	return date ? date.substring(0, 4) : "Unknown";
+}
+
+function getItemRuntime(item: TmdbItem) {
+	if (item.media_type === "movie") return formatRuntime(item.runtime ?? null);
+	return formatRuntime(item.episode_run_time?.[0] ?? null);
+}
+
+function getItemStatus(item: TmdbItem): MovieStatus {
+	return entryStatusMap.get(entryKey(item.media_type, item.id)) ?? "watched";
+}
+
+function getStatusLabel(status: MovieStatus) {
+	switch (status) {
+		case "watched":
+			return "Watched";
+		case "watching":
+			return "Watching Now";
+		case "watchlist":
+			return "Watchlist";
+	}
+}
+
+function getStatusColor(status: MovieStatus) {
+	switch (status) {
+		case "watched":
+			return "bg-green-500";
+		case "watching":
+			return "bg-yellow-500";
+		case "watchlist":
+			return "bg-blue-500";
+	}
+}
+
+async function fetchTmdbItem(entry: TmdbEntry): Promise<TmdbItem | null> {
+	if (!accessToken) return null;
+
+	try {
+		const response = await fetch(
+			`https://api.themoviedb.org/3/${entry.mediaType}/${entry.id}?language=${encodeURIComponent(language)}`,
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					Accept: "application/json",
+				},
+			},
+		);
+
+		if (!response.ok) {
+			console.warn(
+				`[TMDB] Failed to fetch ${entry.mediaType} ${entry.id}: ${response.status}`,
+			);
+			return null;
+		}
+
+		return {
+			...((await response.json()) as Omit<TmdbItem, "media_type">),
+			media_type: entry.mediaType,
+		};
+	} catch (error) {
+		console.error(
+			`[TMDB] Failed to fetch ${entry.mediaType} ${entry.id}:`,
+			error,
+		);
+		return null;
+	}
+}
+
+const items = accessToken
+	? (await Promise.all(uniqueTmdbEntries.map(fetchTmdbItem))).filter(
+			(item): item is TmdbItem => item !== null,
+		)
+	: [];
+
+const statusCounts = items.reduce(
+	(acc, item) => {
+		const status = getItemStatus(item);
+		acc[status] = (acc[status] || 0) + 1;
+		return acc;
+	},
+	{} as Record<MovieStatus, number>,
+);
+
+const filters = [
+	{ value: "all", label: "All", count: items.length },
+	{ value: "watched", label: "Watched", count: statusCounts.watched || 0 },
+	{
+		value: "watching",
+		label: "Watching Now",
+		count: statusCounts.watching || 0,
+	},
+	{
+		value: "watchlist",
+		label: "Watchlist",
+		count: statusCounts.watchlist || 0,
+	},
+].filter((filter) => filter.value === "all" || filter.count > 0);
+---
+
+<MainGridLayout title="TMDB" description="Films and shows I watched">
+	<div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-9 py-6 relative w-full">
+			<div class="relative w-full mb-8">
+				<div class="mb-6">
+					<div class="flex items-center gap-3 mb-3">
+						<div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+							<Icon name="material-symbols:movie" class="text-[1.5rem]" />
+						</div>
+						<div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+							TMDB
+						</div>
+					</div>
+					<p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed">
+						Films and shows I watched, powered by The Movie Database.
+					</p>
+					<p class="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
+						Last updated {buildTime}
+					</p>
+				</div>
+			</div>
+
+			{!accessToken ? (
+				<div class="text-center py-16">
+					<div class="inline-flex items-center justify-center w-16 h-16 bg-(--btn-regular-bg) rounded-full mb-6 border border-(--line-divider)">
+						<Icon name="material-symbols:key" class="text-[2rem] text-(--btn-content)" />
+					</div>
+					<h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+						TMDB token is not configured
+					</h2>
+					<p class="text-black/60 dark:text-white/60 mb-4 max-w-xl mx-auto">
+						Add your TMDB API Read Access Token to <code>.env</code> as <code>TMDB_ACCESS_TOKEN</code>, then restart the dev server.
+					</p>
+					<div class="text-sm text-black/50 dark:text-white/50">
+						Configured TMDB IDs: {uniqueTmdbEntries.map((entry) => `${entry.mediaType}/${entry.id}`).join(", ")}
+					</div>
+				</div>
+			) : items.length > 0 ? (
+				<>
+						<FilterControls
+							filters={filters}
+							activeFilter="all"
+							sectionId={sectionId}
+							variant="gallery"
+						/>
+
+					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+						{items.map((item, index) => {
+							const status = getItemStatus(item);
+							const title = getItemTitle(item);
+							const runtime = getItemRuntime(item);
+
+							return (
+							<div
+								data-item-section={sectionId}
+								data-item-status={status}
+								style={index < itemsPerPage ? undefined : "display: none;"}
+							>
+								<a
+									href={tmdbUrl(item.media_type, item.id)}
+									target="_blank"
+									rel="noopener noreferrer nofollow"
+									class="group relative overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] block bg-(--btn-regular-bg)"
+								>
+									<div class="aspect-2/3 relative overflow-hidden">
+										{item.poster_path ? (
+											<img
+												src={item.poster_path ? posterUrl(item.poster_path) : undefined}
+												alt={title}
+												class="w-full h-full object-cover pointer-events-none transition-transform duration-500 group-hover:scale-105"
+												loading="lazy"
+												decoding="async"
+											/>
+										) : item.backdrop_path ? (
+											<img
+												src={backdropUrl(item.backdrop_path)}
+												alt={title}
+												class="w-full h-full object-cover pointer-events-none transition-transform duration-500 group-hover:scale-105"
+												loading="lazy"
+												decoding="async"
+											/>
+										) : (
+											<div class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+												<Icon name="material-symbols:movie" class="text-[3rem] text-gray-400" />
+											</div>
+										)}
+
+										<div class={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs text-white font-medium ${getStatusColor(status)}`}>
+											{getStatusLabel(status)}
+										</div>
+
+										<div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs text-white font-medium bg-black/50 backdrop-blur-sm">
+											{item.vote_average.toFixed(1)}
+										</div>
+
+										<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+										<div class="absolute bottom-0 left-0 right-0 p-3">
+											<h3 class="font-bold text-sm text-white line-clamp-2 drop-shadow-lg">
+												{title}
+											</h3>
+											<div class="text-xs text-white/65 mt-1">
+												{getItemYear(item)}
+												{runtime && ` · ${runtime}`}
+											</div>
+											{item.genres.length > 0 && (
+												<div class="flex flex-wrap gap-1 mt-1.5">
+													{item.genres.slice(0, 3).map((genre) => (
+														<span class="text-[0.6rem] px-1.5 py-0.5 rounded bg-white/20 text-white/90 backdrop-blur-sm">
+															{genre.name}
+														</span>
+													))}
+												</div>
+											)}
+										</div>
+									</div>
+								</a>
+							</div>
+							);
+						})}
+					</div>
+
+					<ClientPagination
+						totalItems={items.length}
+						itemsPerPage={itemsPerPage}
+						currentPage={1}
+						sectionId={sectionId}
+					/>
+				</>
+			) : (
+				<div class="text-center py-16">
+					<div class="inline-flex items-center justify-center w-16 h-16 bg-(--btn-regular-bg) rounded-full mb-6 border border-(--line-divider)">
+						<Icon name="material-symbols:error-outline" class="text-[2rem] text-(--btn-content)" />
+					</div>
+					<h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+						No movies loaded
+					</h2>
+					<p class="text-black/60 dark:text-white/60 mb-4 max-w-xl mx-auto">
+						Check that the TMDB token is valid and that the configured IDs exist.
+					</p>
+				</div>
+			)}
+
+			<p class="text-xs text-black/45 dark:text-white/45 mt-8">
+				This product uses the TMDB API but is not endorsed or certified by TMDB.
+			</p>
+		</div>
+	</div>
+</MainGridLayout>
+
+<style>
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+</style>

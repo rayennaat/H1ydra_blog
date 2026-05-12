@@ -1,38 +1,16 @@
-# 关于我 / About Me
+# About Me
 
-你好！我是 **夏叶** ，一个在数字世界中默默无闻的一片叶子。
+I'm a cybersecurity student, CTF player, and developer with a strong passion for building secure, practical, and modern digital experiences. My journey combines two worlds I care about deeply: cybersecurity and software development.
 
-## 🛠️ 关于本站
+I enjoy working on CTF challenges, learning about web security, digital forensics, and real-world attack-and-defense concepts. At the same time, I build full-stack projects using technologies like React, Next.js, Node.js, Express, MongoDB, TailwindCSS, and Prisma.
 
-这个网站使用 **Astro** 框架构建，采用了 [Firefly](https://github.com/CuteLeaf/Firefly) 模板，Firefly 是基于 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发。
+Through this portfolio, I share my projects, cybersecurity journey, CTF progress, and the skills I'm developing as I grow toward becoming a stronger security-minded developer.
 
-**Firefly** 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
+Feel free to explore my work and connect with me!
 
+## Contact
 
-**🖥️在线预览： [Firefly - Demo site](https://firefly.cuteleaf.cn/)**
-
-**🏠我的博客： [https://blog.cuteleaf.cn](https://blog.cuteleaf.cn/)**
-
-**📝Firefly使用文档： [https://docs-firefly.cuteleaf.cn](https://docs-firefly.cuteleaf.cn/)**
-
-**⭐Firefly开源地址：[https://github.com/CuteLeaf/Firefly](https://github.com/CuteLeaf/Firefly)** 
-
-**⭐Fuwari开源地址：[https://github.com/saicaca/fuwari](https://github.com/saicaca/fuwari)**
-
-::github{repo="CuteLeaf/Firefly"}
-
-::github{repo="saicaca/fuwari"}
-
-
-## 📫 联系方式
-
-如果你想和我交流技术问题，分享有趣的想法，或者只是想打个招呼，欢迎通过以下方式联系我：
-
-- 💻 **GitHub**: [CuteLeaf](https://github.com/CuteLeaf)
-- ✉️ **Email**: [xiaye@msn.com](mailto:xiaye@msn.com)
-- 🐧 **QQ交流群：[1087127207](https://qm.qq.com/q/ZGsFa8qX2G)**
-
----
-
-*感谢你的来访！希望在这里能找到对你有用的内容！*
-
+- **Discord**: H1YDRA#4899
+- **GitHub**: [rayennaat](https://github.com/rayennaat)
+- **LinkedIn**: [rayennaat](https://www.linkedin.com/in/rayennaat/)
+- **Email**: [rayen.enaate@gmail.com](mailto:rayen.enaate@gmail.com)

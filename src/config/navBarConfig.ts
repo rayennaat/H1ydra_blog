@@ -19,46 +19,49 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 	];
 
 	// 根据配置决定是否添加友链，在siteConfig关闭pages.friends时导航栏不显示友链
-	if (siteConfig.pages.friends) {
-		links.push(LinkPreset.Friends);
-	}
-
 	// 根据配置决定是否添加留言板，在siteConfig关闭pages.guestbook时导航栏不显示留言板
 	if (siteConfig.pages.guestbook) {
-		links.push(LinkPreset.Guestbook);
+		links.push({
+			name: "Notes",
+			url: "/guestbook/",
+			icon: "material-symbols:chat",
+		});
 	}
 
-	// 我的及其子菜单
 	links.push({
-		name: "我的",
+		name: "Other",
 		url: "/my/",
-		icon: "material-symbols:person",
+		icon: "material-symbols:apps",
 		children: [
-			// 根据配置决定是否添加相册，在siteConfig关闭pages.gallery时导航栏不显示相册
-			...(siteConfig.pages.gallery ? [LinkPreset.Gallery] : []),
+			...(siteConfig.pages.anime
+				? [
+						{
+							name: "MyAnimeList",
+							url: "/anime/",
+							icon: "material-symbols:animation",
+						},
+					]
+				: []),
 
 			// 根据配置决定是否添加番组计划，在siteConfig关闭pages.bangumi时导航栏不显示番组计划
 			...(siteConfig.pages.bangumi ? [LinkPreset.Bangumi] : []),
+
+			...(siteConfig.pages.tmdb
+				? [
+						{
+							name: "TMDB",
+							url: "/tmdb/",
+							icon: "material-symbols:movie",
+						},
+					]
+				: []),
 		],
 	});
 
-	// 关于及其子菜单
-	links.push({
-		name: "关于",
-		url: "/content/",
-		icon: "material-symbols:info",
-		children: [
-			// 根据配置决定是否添加赞助，在siteConfig关闭pages.sponsor时导航栏不显示赞助
-			...(siteConfig.pages.sponsor ? [LinkPreset.Sponsor] : []),
+	links.push(LinkPreset.About);
 
-			// 关于页面
-			LinkPreset.About,
-		],
-	});
-
-	// 自定义导航栏链接,并且支持多级菜单
 	links.push({
-		name: "链接",
+		name: "Links",
 		url: "/links/",
 		icon: "material-symbols:link",
 
@@ -66,21 +69,15 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		children: [
 			{
 				name: "GitHub",
-				url: "https://github.com/CuteLeaf/Firefly",
+				url: "https://github.com/rayennaat",
 				external: true,
 				icon: "fa7-brands:github",
 			},
 			{
-				name: "Gitee",
-				url: "https://gitee.com/CuteLeaf/Firefly",
+				name: "LinkedIn",
+				url: "https://www.linkedin.com/in/rayennaat/",
 				external: true,
-				icon: "fa7-brands:gitee",
-			},
-			{
-				name: "QQ交流群",
-				url: "https://qm.qq.com/q/ZGsFa8qX2G",
-				external: true,
-				icon: "fa7-brands:qq",
+				icon: "fa7-brands:linkedin",
 			},
 		],
 	});
