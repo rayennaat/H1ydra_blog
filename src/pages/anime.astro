@@ -13,6 +13,9 @@ const statuses = siteConfig.anime?.statuses ?? [
 	"completed",
 	"plan_to_watch",
 ];
+const baseUrl = import.meta.env.BASE_URL || "/";
+const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+const animeApiUrl = `${normalizedBaseUrl}api/anime.json`;
 ---
 
 <MainGridLayout title="MyAnimeList" description="Anime I am watching and completed">
@@ -75,7 +78,7 @@ const statuses = siteConfig.anime?.statuses ?? [
 	</div>
 </MainGridLayout>
 
-<script is:inline define:vars={{ username, statuses }}>
+<script is:inline define:vars={{ username, statuses, animeApiUrl }}>
 	const ITEMS_PER_PAGE = 12;
 	const STATUS_META = {
 		watching: {
@@ -298,7 +301,7 @@ const statuses = siteConfig.anime?.statuses ?? [
 
 	async function initAnimePage() {
 		try {
-			const response = await fetch("/api/anime.json");
+			const response = await fetch(animeApiUrl);
 			const payload = await response.json();
 
 			if (!response.ok || !payload.configured) {
