@@ -45,8 +45,8 @@ if (process.env.NODE_ENV === "development") {
 // https://astro.build/config
 export default defineConfig({
 	site: siteConfig.site_url,
-	
-	base: "/",
+
+	base: "/H1ydra_blog",
 	trailingSlash: "always",
 
 	// 图像优化配置
